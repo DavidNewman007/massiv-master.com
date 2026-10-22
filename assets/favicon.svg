@@ -1,0 +1,30 @@
+<svg color="#1b1a17" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="МАССИВ МАСТЕР">
+  
+  <defs>
+    <mask id="mm-cut" maskUnits="userSpaceOnUse" x="0" y="0" width="200" height="200">
+      <rect width="200" height="200" fill="#fff"/>
+      <g fill="none" stroke="#000" stroke-linecap="round">
+        <g stroke-width="3.4">
+          <path d="M100 79c6 0 10 5 10 10s-5 10-10 10-10-4-10-10 4-10 10-10z"/>
+          <path d="M101 64c14-1 25 11 24 25-1 13-11 24-25 24-14-1-24-11-24-25 1-13 11-23 25-24z"/>
+          <path d="M99 48c24 0 41 18 41 41 0 22-19 39-41 39-23 0-40-18-40-40 1-22 17-40 40-40z"/>
+          <path d="M101 32c32-1 56 25 55 57-1 31-27 55-58 54-31-1-55-26-54-57 1-30 26-53 57-54z"/>
+        </g>
+        <g stroke-width="2.6">
+          <path d="M104 72c2-12 6-26 4-42"/>
+          <path d="M113 84c11-8 24-16 36-30"/>
+          <path d="M87 82c-10-7-20-18-30-30"/>
+          <path d="M84 96c-13 3-28 3-44 1"/>
+          <path d="M117 96c13 2 27 6 40 4"/>
+          <path d="M96 64c-3-10-4-20-9-30"/>
+        </g>
+        <path d="M14 152l40-30 16 9 32-38 22 24 14-10 50 45" stroke-width="7" stroke-linejoin="round"/>
+      </g>
+    </mask>
+    <clipPath id="mm-disk"><circle cx="100" cy="100" r="86"/></clipPath>
+  </defs>
+  <circle cx="100" cy="100" r="95" fill="none" stroke="currentColor" stroke-width="5"/>
+  <g clip-path="url(#mm-disk)">
+    <rect width="200" height="200" fill="currentColor" mask="url(#mm-cut)"/>
+  </g>
+</svg>
