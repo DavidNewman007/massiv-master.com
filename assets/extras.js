@@ -7,6 +7,7 @@
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const EN = document.documentElement.lang === 'en';
   const fine = matchMedia('(hover: hover) and (pointer: fine)').matches;
 
   // ---------- клеймо ----------
@@ -21,8 +22,8 @@
         <defs><path id="st-top" d="M38,130 a92,92 0 1,1 184,0"/><path id="st-bot" d="M30,130 a100,100 0 0,0 200,0"/></defs>
         <circle cx="130" cy="130" r="122" fill="none" stroke="currentColor" stroke-width="5"/>
         <circle cx="130" cy="130" r="112" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="3 6"/>
-        <text><textPath href="#st-top" startOffset="50%" text-anchor="middle">МАССИВ МАСТЕР</textPath></text>
-        <text class="b"><textPath href="#st-bot" startOffset="50%" text-anchor="middle">СДЕЛАНО В СОЧИ</textPath></text>
+        <text><textPath href="#st-top" startOffset="50%" text-anchor="middle">${EN ? 'MASSIV MASTER' : 'МАССИВ МАСТЕР'}</textPath></text>
+        <text class="b"><textPath href="#st-bot" startOffset="50%" text-anchor="middle">${EN ? 'MADE IN SOCHI' : 'СДЕЛАНО В СОЧИ'}</textPath></text>
       </svg>`;
       const mark = logo.cloneNode(true);
       mark.setAttribute('class', 'stamp-mark');
@@ -95,8 +96,8 @@
     const el = document.createElement('a');
     el.className = 'rings';
     el.href = '#main';
-    el.setAttribute('aria-label', 'Наверх');
-    el.innerHTML = `<svg viewBox="0 0 64 64" aria-hidden="true"><circle class="core" cx="32" cy="32" r="1.6"/>${Array.from({ length: N }, (_, i) => ring(i)).join('')}</svg><span class="rings-lbl">Кольцо <b>00</b></span>`;
+    el.setAttribute('aria-label', EN ? 'Back to top' : 'Наверх');
+    el.innerHTML = `<svg viewBox="0 0 64 64" aria-hidden="true"><circle class="core" cx="32" cy="32" r="1.6"/>${Array.from({ length: N }, (_, i) => ring(i)).join('')}</svg><span class="rings-lbl">${EN ? 'Ring' : 'Кольцо'} <b>00</b></span>`;
     document.body.appendChild(el);
     const paths = $$('path', el), lbl = $('b', el);
     paths.forEach((p) => { const L = p.getTotalLength(); p.style.strokeDasharray = L; p.style.strokeDashoffset = L; p.dataset.l = L; });

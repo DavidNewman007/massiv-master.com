@@ -6,6 +6,20 @@
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
   const CAT = window.MM_CATALOG || {};
   const TG = window.MM_TG;
+  // Язык страницы: английская версия живёт в /en/, тексты интерфейса берём отсюда
+  const EN = document.documentElement.lang === 'en';
+  const PFX = EN ? '/en' : '';
+  const T = EN ? {
+    added: 'Added to your selection', already: 'Already in your selection', remove: 'Remove',
+    total: (s) => `Total: ${s.toLocaleString('en-US')} ₽`, plusAsk: ' + items with price on request', askPrice: 'I will confirm prices in our chat',
+    hello: 'Hello! I would like to order:', copied: 'Text copied', copyFail: 'Could not copy',
+    all: 'All wood in the workshop', archive: 'Archive of works', inArchive: 'Works in archive', count: 'Items',
+  } : {
+    added: 'Добавлено в подборку', already: 'Уже в подборке', remove: 'Убрать',
+    total: (s) => `Итого: ${s.toLocaleString('ru-RU')} ₽`, plusAsk: ' + позиции с ценой по запросу', askPrice: 'Цены уточню в переписке',
+    hello: 'Здравствуйте! Хочу заказать:', copied: 'Текст скопирован', copyFail: 'Не удалось скопировать',
+    all: 'Всё дерево мастерской', archive: 'Архив работ', inArchive: 'Работ в архиве', count: 'Позиций',
+  };
 
   // --- шапка и меню ---
   const header = $('[data-header]');
@@ -16,6 +30,9 @@
     const open = menuBtn.getAttribute('aria-expanded') !== 'true';
     menuBtn.setAttribute('aria-expanded', open); nav.classList.toggle('open', open);
   });
+
+  // переключатель языка сохраняет фильтры каталога (?cat=…)
+  $$('[data-lang-switch]').forEach((a) => { if (location.search) a.href = a.getAttribute('href') + location.search; });
 
   // --- уведомление ---
   const toastEl = $('[data-toast]'); let toastT;
@@ -31,7 +48,7 @@
   renderCount();
   $$('[data-add]').forEach((btn) => btn.addEventListener('click', () => {
     const { slug } = JSON.parse(btn.dataset.add); const b = readBag();
-    if (!b.includes(slug)) { b.push(slug); writeBag(b); toast('Добавлено в подборку'); } else toast('Уже в подборке');
+    if (!b.includes(slug)) { b.push(slug); writeBag(b); toast(T.added); } else toast(T.already);
   }));
 
   // Telegram: ссылка уже содержит текст; на всякий случай кладём его и в буфер обмена.
@@ -42,17 +59,17 @@
     const render = () => {
       const b = readBag();
       $('[data-bag-empty]').hidden = !!b.length; $('[data-bag-summary]').hidden = !b.length;
-      bagList.innerHTML = b.map((s) => `<div class="bag-row"><img src="${CAT[s].img}" alt=""><div><a href="/item/${s}/">${CAT[s].t}</a><p>${CAT[s].pt}</p></div><button data-rm="${s}" aria-label="Убрать">×</button></div>`).join('');
+      bagList.innerHTML = b.map((s) => `<div class="bag-row"><img src="${CAT[s].img}" alt=""><div><a href="${PFX}/item/${s}/">${CAT[s].t}</a><p>${CAT[s].pt}</p></div><button data-rm="${s}" aria-label="${T.remove}">×</button></div>`).join('');
       const priced = b.filter((s) => CAT[s].p && !CAT[s].u && !CAT[s].f);
       const sum = priced.reduce((a, s) => a + CAT[s].p, 0);
-      $('[data-bag-total]').textContent = sum ? `Итого: ${sum.toLocaleString('ru-RU')} ₽${priced.length < b.length ? ' + позиции с ценой по запросу' : ''}` : 'Цены уточню в переписке';
-      const text = `Здравствуйте! Хочу заказать:\n${b.map((s, i) => `${i + 1}. ${CAT[s].t} — ${CAT[s].pt}\n${window.MM_SITE}/item/${s}/`).join('\n')}`;
+      $('[data-bag-total]').textContent = sum ? `${T.total(sum)}${priced.length < b.length ? T.plusAsk : ''}` : T.askPrice;
+      const text = `${T.hello}\n${b.map((s, i) => `${i + 1}. ${CAT[s].t} — ${CAT[s].pt}\n${window.MM_SITE}${PFX}/item/${s}/`).join('\n')}`;
       const send = $('[data-bag-send]'); send.href = `https://t.me/${TG}?text=${encodeURIComponent(text)}`; send.dataset.text = text;
       $$('[data-rm]').forEach((x) => x.addEventListener('click', () => { writeBag(readBag().filter((s) => s !== x.dataset.rm)); render(); }));
     };
     render();
     $('[data-bag-send]').addEventListener('click', (e) => copy(e.currentTarget.dataset.text));
-    $('[data-bag-copy]').addEventListener('click', async () => toast((await copy($('[data-bag-send]').dataset.text)) ? 'Текст скопирован' : 'Не удалось скопировать'));
+    $('[data-bag-copy]').addEventListener('click', async () => toast((await copy($('[data-bag-send]').dataset.text)) ? T.copied : T.copyFail));
   }
 
   // --- каталог ---
@@ -65,7 +82,7 @@
     const params = new URLSearchParams(location.search);
     const st = { cat: params.get('cat') || 'all', species: params.get('species') || 'all', view: params.get('view') || 'sale' };
     const SALE = ['available', 'ask', 'order', 'work'];
-    const titles = { all: 'Всё дерево мастерской' };
+    const titles = { all: T.all };
     $$('[data-f-cat]').forEach((b) => { if (b.dataset.fCat !== 'all') titles[b.dataset.fCat] = b.textContent; });
     const apply = () => {
       let n = 0;
@@ -78,9 +95,9 @@
       $$('[data-f-cat]').forEach((b) => b.setAttribute('aria-pressed', b.dataset.fCat === st.cat));
       $$('[data-f-view]').forEach((b) => b.setAttribute('aria-pressed', b.dataset.fView === st.view));
       $('[data-f-species]').value = st.species;
-      $('[data-count]').textContent = `${st.view === 'archive' ? 'Работ в архиве' : 'Позиций'}: ${n}`;
+      $('[data-count]').textContent = `${st.view === 'archive' ? T.inArchive : T.count}: ${n}`;
       $('[data-empty]').hidden = n > 0;
-      $('[data-cat-title]').textContent = st.view === 'archive' ? 'Архив работ' : (st.cat === 'all' ? titles.all : $(`[data-f-cat="${st.cat}"]`).textContent);
+      $('[data-cat-title]').textContent = st.view === 'archive' ? T.archive : (st.cat === 'all' ? titles.all : $(`[data-f-cat="${st.cat}"]`).textContent);
       const q = new URLSearchParams(); if (st.cat !== 'all') q.set('cat', st.cat); if (st.species !== 'all') q.set('species', st.species); if (st.view !== 'sale') q.set('view', st.view);
       history.replaceState(null, '', q.toString() ? `?${q}` : location.pathname);
     };
